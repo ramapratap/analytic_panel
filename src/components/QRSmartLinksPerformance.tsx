@@ -1,5 +1,5 @@
-import React, { useEffect} from 'react';
-import { QrCode, Link, TrendingUp,  MousePointer } from 'lucide-react';
+import React, { useEffect } from 'react';
+import { QrCode, Link, TrendingUp, MousePointer } from 'lucide-react';
 import { useApi } from '../context/ApiContext';
 import { useTheme } from '../context/ThemeContext';
 import ChartCard from './shared/ChartCard';
@@ -10,13 +10,19 @@ const QRSmartLinksPerformance: React.FC = () => {
   const { theme } = useTheme();
 
   useEffect(() => {
-    if (!data.qrAnalytics) {
-      fetchData('https://s-qc.in/fetchQrById/688b10f5fa588e8292a81ed5', 'qrAnalytics');
-    }
-    if (!data.smartLinks) {
-      fetchData('https://s-qc.in/fetchSmartLinkByUser/676410d092064c3242909930', 'smartLinks');
-    }
-  }, []);
+    const initData = async () => {
+      try {
+        await Promise.all([
+          fetchData('https://s-qc.in/fetchQrById/688b10f5fa588e8292a81ed5', 'qrAnalytics', 'GET'),
+          fetchData('https://s-qc.in/fetchSmartLinkByUser/676410d092064c3242909930', 'smartLinks', 'POST')
+        ]);
+      } catch (error) {
+        console.error('Error initializing QR/Smart Links data:', error);
+      }
+    };
+
+    initData();
+  }, [fetchData]);
 
   // Process QR Analytics Data
   const getQRData = () => {
@@ -24,34 +30,43 @@ const QRSmartLinksPerformance: React.FC = () => {
     
     const qrData = data.qrAnalytics;
     return {
-      totalScans: qrData.analytics?.averageDailyScans || 0,
+      totalScans: qrData.qr_scan_count || qrData.analytics?.averageDailyScans || 0,
       deviceBreakdown: qrData.analytics?.deviceBreakdown || {},
-      timeStats: qrData.timeStats || {},
-      dailyScans: qrData.timeStats?.dailyScans || {},
+      timeStats: qrData.analytics?.timeStats || {},
+      dailyScans: qrData.analytics?.timeStats?.dailyScans || {},
     };
   };
 
   // Process Smart Links Data
   const getSmartLinksData = () => {
-    // If smartLinks is an array, return it directly; if it's an object with .data, use .data
     if (!data.smartLinks) return [];
+    
     let linksArray: any[] = [];
+    
+    // Handle different data structures
     if (Array.isArray(data.smartLinks)) {
       linksArray = data.smartLinks;
-    } else if (data.smartLinks && typeof data.smartLinks === 'object' && 'data' in data.smartLinks && Array.isArray((data.smartLinks as any).data)) {
-      linksArray = (data.smartLinks as any).data;
+    } else if (data.smartLinks && typeof data.smartLinks === 'object') {
+      // Check if it has a 'data' property
+      if ('data' in data.smartLinks && Array.isArray((data.smartLinks as any).data)) {
+        linksArray = (data.smartLinks as any).data;
+      } else {
+        // If it's a single object, wrap it in an array
+        linksArray = [data.smartLinks];
+      }
     }
+    
     if (!Array.isArray(linksArray)) return [];
     
     return linksArray.map((link: any) => ({
-      id: link._id,
-      name: link.name,
+      id: link._id || link.id || Math.random().toString(),
+      name: link.name || 'Unnamed Link',
       clickRate: link.clickRate || 0,
       totalClicks: link.totalClicks || 0,
-      isActive: link.isActive,
-      createdAt: link.createdAt,
-      lastClickedAt: link.lastClickedAt,
-      redirectLink: link.redirect_link,
+      isActive: link.isActive !== undefined ? link.isActive : true,
+      createdAt: link.createdAt || Date.now(),
+      lastClickedAt: link.lastClickedAt || null,
+      redirectLink: link.redirect_link || link.redirectLink || '#',
     }));
   };
 
@@ -61,6 +76,10 @@ const QRSmartLinksPerformance: React.FC = () => {
     if (!qrData?.deviceBreakdown) return null;
 
     const breakdown = qrData.deviceBreakdown;
+    const hasData = (breakdown.mobile || 0) + (breakdown.tablet || 0) + (breakdown.desktop || 0) > 0;
+    
+    if (!hasData) return null;
+
     return {
       labels: ['Mobile', 'Tablet', 'Desktop'],
       datasets: [{
@@ -82,6 +101,8 @@ const QRSmartLinksPerformance: React.FC = () => {
     const scans = qrData.dailyScans;
     const dates = Object.keys(scans).sort().slice(-7); // Last 7 days
     
+    if (dates.length === 0) return null;
+    
     return {
       labels: dates.map(date => new Date(date).toLocaleDateString()),
       datasets: [{
@@ -100,7 +121,10 @@ const QRSmartLinksPerformance: React.FC = () => {
     if (!links.length) return null;
 
     return {
-      labels: links.map((link: any) => link.name.substring(0, 15) + '...'),
+      labels: links.map((link: any) => {
+        const name = link.name || 'Unnamed';
+        return name.length > 15 ? name.substring(0, 15) + '...' : name;
+      }),
       datasets: [{
         label: 'Total Clicks',
         data: links.map((link: any) => link.totalClicks),
@@ -115,7 +139,9 @@ const QRSmartLinksPerformance: React.FC = () => {
     const smartLinks = getSmartLinksData();
     
     const totalQRScans = qrData?.totalScans || 0;
-    const totalSmartLinkClicks = smartLinks.reduce((sum: number, link: any) => sum + link.totalClicks, 0);
+    const totalSmartLinkClicks = smartLinks.reduce((sum: number, link: any) => sum + (link.totalClicks || 0), 0);
+    
+    if (totalQRScans === 0 && totalSmartLinkClicks === 0) return null;
     
     return {
       labels: ['QR Code Scans', 'Smart Link Clicks'],
@@ -126,7 +152,9 @@ const QRSmartLinksPerformance: React.FC = () => {
     };
   };
 
-  if (loading.qrAnalytics && loading.smartLinks) {
+  const isLoading = loading.qrAnalytics || loading.smartLinks;
+
+  if (isLoading && !data.qrAnalytics && !data.smartLinks) {
     return <LoadingSkeleton type="performance" />;
   }
 
@@ -136,6 +164,12 @@ const QRSmartLinksPerformance: React.FC = () => {
   const qrTrendData = getQRTrendData();
   const smartLinksChart = getSmartLinksChart();
   const comparisonData = getComparisonData();
+
+  // Calculate summary stats
+  const totalQRScans = qrData?.totalScans || 0;
+  const totalSmartLinks = smartLinks.length;
+  const totalClicks = smartLinks.reduce((sum: number, link: any) => sum + (link.totalClicks || 0), 0);
+  const activeLinks = smartLinks.filter((link: any) => link.isActive).length;
 
   return (
     <div className="space-y-6">
@@ -161,7 +195,7 @@ const QRSmartLinksPerformance: React.FC = () => {
                 Total QR Scans
               </p>
               <p className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                {qrData?.totalScans?.toLocaleString() || '0'}
+                {totalQRScans.toLocaleString()}
               </p>
             </div>
           </div>
@@ -177,7 +211,7 @@ const QRSmartLinksPerformance: React.FC = () => {
                 Smart Links
               </p>
               <p className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                {smartLinks.length.toLocaleString()}
+                {totalSmartLinks.toLocaleString()}
               </p>
             </div>
           </div>
@@ -193,7 +227,7 @@ const QRSmartLinksPerformance: React.FC = () => {
                 Total Clicks
               </p>
               <p className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                {smartLinks.reduce((sum: number, link: any) => sum + link.totalClicks, 0).toLocaleString()}
+                {totalClicks.toLocaleString()}
               </p>
             </div>
           </div>
@@ -209,7 +243,7 @@ const QRSmartLinksPerformance: React.FC = () => {
                 Active Links
               </p>
               <p className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                {smartLinks.filter((link: any) => link.isActive).length.toLocaleString()}
+                {activeLinks.toLocaleString()}
               </p>
             </div>
           </div>
@@ -227,22 +261,44 @@ const QRSmartLinksPerformance: React.FC = () => {
             </h2>
           </div>
           
-          {qrTrendData && (
+          {qrTrendData ? (
             <ChartCard
               title="Daily Scan Trends"
               subtitle="QR code scans over the last 7 days"
               type="line"
               data={qrTrendData}
             />
+          ) : (
+            <div className={`p-6 rounded-lg border ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+              <h3 className={`text-lg font-semibold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                Daily Scan Trends
+              </h3>
+              <div className="text-center py-8">
+                <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                  No scan trend data available
+                </p>
+              </div>
+            </div>
           )}
           
-          {qrDeviceData && (
+          {qrDeviceData ? (
             <ChartCard
               title="Device Breakdown"
               subtitle="QR scans by device type"
               type="doughnut"
               data={qrDeviceData}
             />
+          ) : (
+            <div className={`p-6 rounded-lg border ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+              <h3 className={`text-lg font-semibold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                Device Breakdown
+              </h3>
+              <div className="text-center py-8">
+                <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                  No device breakdown data available
+                </p>
+              </div>
+            </div>
           )}
         </div>
 
@@ -255,13 +311,24 @@ const QRSmartLinksPerformance: React.FC = () => {
             </h2>
           </div>
           
-          {smartLinksChart && (
+          {smartLinksChart ? (
             <ChartCard
               title="Top Performing Links"
               subtitle="Links with highest click counts"
               type="bar"
               data={smartLinksChart}
             />
+          ) : (
+            <div className={`p-6 rounded-lg border ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+              <h3 className={`text-lg font-semibold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                Top Performing Links
+              </h3>
+              <div className="text-center py-8">
+                <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                  No smart links data available
+                </p>
+              </div>
+            </div>
           )}
           
           {/* Smart Links Table */}
@@ -269,36 +336,44 @@ const QRSmartLinksPerformance: React.FC = () => {
             <h3 className={`text-lg font-semibold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
               Recent Smart Links
             </h3>
-            <div className="space-y-3 max-h-80 overflow-y-auto">
-              {smartLinks.slice(0, 10).map((link: any) => (
-                <div
-                  key={link.id}
-                  className={`p-4 rounded-lg border ${theme === 'dark' ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1 min-w-0">
-                      <p className={`font-medium truncate ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                        {link.name}
-                      </p>
-                      <p className={`text-sm truncate ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                        {link.redirectLink}
-                      </p>
-                    </div>
-                    <div className="ml-4 text-right">
-                      <p className={`text-sm font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                        {link.totalClicks} clicks
-                      </p>
-                      <div className="flex items-center mt-1">
-                        <div className={`w-2 h-2 rounded-full mr-2 ${link.isActive ? 'bg-green-400' : 'bg-gray-400'}`} />
-                        <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                          {link.isActive ? 'Active' : 'Inactive'}
-                        </span>
+            {smartLinks.length > 0 ? (
+              <div className="space-y-3 max-h-80 overflow-y-auto">
+                {smartLinks.slice(0, 10).map((link: any) => (
+                  <div
+                    key={link.id}
+                    className={`p-4 rounded-lg border ${theme === 'dark' ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1 min-w-0">
+                        <p className={`font-medium truncate ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                          {link.name}
+                        </p>
+                        <p className={`text-sm truncate ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                          {link.redirectLink}
+                        </p>
+                      </div>
+                      <div className="ml-4 text-right">
+                        <p className={`text-sm font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                          {link.totalClicks} clicks
+                        </p>
+                        <div className="flex items-center mt-1">
+                          <div className={`w-2 h-2 rounded-full mr-2 ${link.isActive ? 'bg-green-400' : 'bg-gray-400'}`} />
+                          <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                            {link.isActive ? 'Active' : 'Inactive'}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                  No smart links found
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>

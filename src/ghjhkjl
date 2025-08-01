@@ -1,0 +1,104 @@
+You are a senior frontend developer tasked with building a comprehensive, device-responsive analytics dashboard. Your goal is to create a modern, intuitive interface that transforms raw analytics data into actionable insights.
+
+PROJECT OVERVIEW:
+Build a 4-screen analytics dashboard that processes data from 5 specific APIs to deliver comprehensive analytics insights. The dashboard must be fully responsive and provide excellent user experience across desktop, tablet, and mobile devices.
+
+API ENDPOINTS & DATA STRUCTURE:
+
+User Analytics API: https://mnowapi.web-dimension.com/api/v1/analytics/user/:userId
+Summary API: https://mnowapi.web-dimension.com/api/v1/analytics/summary 
+Complete Analytics API: https://mnowapi.web-dimension.com/api/v1/analytics 
+CategoryWise Analytic API: https://mnowapi.web-dimension.com/api/v1/analytics/categories
+Smart Links API: https://s-qc.in/fetchSmartLinkByUser/676410d092064c3242909930 
+QR Analytics API: https://s-qc.in/fetchQrById/688b10f5fa588e8292a81ed5 
+DETAILED SCREEN SPECIFICATIONS:
+
+Screen 1 - Executive Dashboard:
+
+Create 4-6 KPI cards displaying key metrics from Summary API
+Implement 3 overview charts: trend line chart, performance bar chart, and distribution pie chart
+Add "Recent Activity" section with latest 5-10 activities
+Include quick action buttons for common tasks
+Ensure all elements stack properly on mobile devices
+Screen 2 - Comprehensive Analytics:
+
+Build a data table with Complete Analytics API data including pagination (20 rows per page)
+Implement advanced filtering: date range picker, device type dropdown, location filter, and custom search
+Create toggle view between table and chart visualization
+Add bulk export functionality (CSV, Excel, PDF formats)
+Include column sorting and resizing capabilities
+Screen 3 - User Analytics Deep Dive:
+
+Display user list in a searchable, sortable table format
+Implement click-to-expand functionality showing individual user metrics
+Create user behavior flow visualization
+Add user segmentation charts and engagement heatmaps
+Include user comparison tool (select multiple users)
+Screen 4 - QR & Smart Links Performance:
+
+Split screen layout: QR analytics (left) and Smart Links (right) on desktop, stacked on mobile
+QR Section: Daily scan trends, device breakdown donut chart, total scans counter
+Smart Links Section: Click performance table, top-performing links chart, conversion metrics
+Add comparative analysis section with QR vs Smart Links performance charts
+TECHNICAL IMPLEMENTATION REQUIREMENTS:
+
+Responsive Design:
+
+Mobile-first approach with breakpoints: 320px, 768px, 1024px, 1440px
+Implement CSS Grid and Flexbox for layout management
+Ensure touch-friendly interface elements (minimum 44px touch targets)
+Use progressive disclosure for complex data on smaller screens
+Chart Implementation:
+
+Use Chart.js or D3.js for all visualizations
+Required chart types: Line (trends), Bar (comparisons), Pie/Donut (distributions), Area (cumulative data)
+Implement responsive charts that adapt to container size
+Add interactive tooltips with detailed information
+Include chart export functionality
+Performance & UX:
+
+Implement skeleton loading screens for all API calls
+Add error boundaries with user-friendly error messages
+Use debounced search (300ms delay) for real-time filtering
+Implement data caching with 5-minute refresh intervals
+Add pull-to-refresh functionality on mobile
+Additional Features:
+
+Dark/Light theme toggle with system preference detection
+Real-time data refresh every 30 seconds with visual indicators
+Keyboard navigation support for accessibility
+Print-friendly layouts for all screens
+Offline mode with cached data display
+DELIVERABLES:
+
+Complete HTML/CSS/JavaScript implementation
+Responsive design that works flawlessly on all device sizes
+All 5 API integrations with proper error handling
+Interactive charts and data visualizations
+Export functionality for all data views
+Theme switching capability
+Performance optimizations and caching mechanisms
+SUCCESS CRITERIA:
+
+Dashboard loads within 3 seconds on 3G connection
+All interactions provide immediate visual feedback
+Data is presented in an easily digestible format
+Navigation between screens is intuitive and smooth
+Mobile experience is equivalent to desktop functionality
+Create clean, maintainable code with proper documentation and ensure the final product provides actionable insights that help users make data-driven decisions.
+
+
+Following are the response of APIs
+"/analytics/summary":{"success":true,"data":{"summary":{"totalRequests":70,"successCount":70,"systemErrorCount":0,"successfulRequests":70,"clientErrorRequests":0,"serverErrorRequests":0,"minProcessingTime":0,"maxProcessingTime":193,"avgProcessingTime":2.89,"uniqueUserCount":22,"uniqueCategoryCount":6,"successRate":100,"errorRate":0}},"message":"Analytics summary retrieved successfully","status":200},
+
+"/analytics": {"success":true,"data":{"analytics":[{"_id":"688cad344ead5f38901033c5","userId":"918422055637","category":"Bro mujhe nahi pata 🤷‍♂️","resStatus":200,"resType":"Success","userAgent":"axios/1.7.7","processingTime":0,"timeStamp":"2025-08-01T12:04:04.494Z","createdAt":"2025-08-01T12:04:04.496Z","updatedAt":"2025-08-01T12:04:04.496Z","__v":0},{"_id":"688ca632b7b0d7ac024e192b","userId":"917022339995","category":"Miss fancy-pants 👀","resStatus":200,"resType":"Success","userAgent":"axios/1.7.7","processingTime":0,"timeStamp":"2025-08-01T11:34:10.696Z","createdAt":"2025-08-01T11:34:10.697Z","updatedAt":"2025-08-01T11:34:10.697Z","__v":0},{"_id":"688ca5e94ead5f38901033bc","userId":"917022339995","category":"Beauty queen ✨","resStatus":200,"resType":"Success","userAgent":"axios/1.7.7","processingTime":0,"timeStamp":"2025-08-01T11:32:57.406Z","createdAt":"2025-08-01T11:32:57.407Z","updatedAt":"2025-08-01T11:32:57.407Z","__v":0},{"_id":"688ca2c4b7b0d7ac024e1929","userId":"918778730378","category":"Beauty queen ✨","resStatus":200,"resType":"Success","userAgent":"axios/1.7.7","processingTime":0,"timeStamp":"2025-08-01T11:19:32.548Z","createdAt":"2025-08-01T11:19:32.550Z","updatedAt":"2025-08-01T11:19:32.550Z","__v":0},{"_id":"688c9dd44ead5f38901033ba","userId":"919732953071","category":"Bro mujhe nahi pata 🤷‍♂️","resStatus":200,"resType":"Success","userAgent":"axios/1.7.7","processingTime":0,"timeStamp":"2025-08-01T10:58:28.708Z","createdAt":"2025-08-01T10:58:28.709Z","updatedAt":"2025-08-01T10:58:28.709Z","__v":0},{"_id":"688c9da6b7b0d7ac024e1927","userId":"919346638486","category":"Bro mujhe nahi pata 🤷‍♂️","resStatus":200,"resType":"Success","userAgent":"axios/1.7.7","processingTime":0,"timeStamp":"2025-08-01T10:57:42.752Z","createdAt":"2025-08-01T10:57:42.753Z","updatedAt":"2025-08-01T10:57:42.753Z","__v":0}]}
+
+"/analytics/user/:userId": {"success":true,"data":{"userRequests":[{"_id":"688c99f2b7b0d7ac024e191f","userId":"919015190754","category":"Home decor obsessed 🪴","resStatus":200,"resType":"Success","userAgent":"axios/1.7.7","processingTime":1,"timeStamp":"2025-08-01T10:41:54.241Z","createdAt":"2025-08-01T10:41:54.248Z","updatedAt":"2025-08-01T10:41:54.248Z","__v":0},{"_id":"688c998764b54728e39b6f15","userId":"919015190754","category":"Beauty queen ✨","resStatus":200,"resType":"Success","userAgent":"axios/1.7.7","processingTime":0,"timeStamp":"2025-08-01T10:40:07.591Z","createdAt":"2025-08-01T10:40:07.599Z","updatedAt":"2025-08-01T10:40:07.599Z","__v":0},{"_id":"688c85a5454725e2e5d035ad","userId":"919015190754","category":"Bro mujhe nahi pata 🤷‍♂️","resStatus":200,"resType":"Success","userAgent":"axios/1.7.7","processingTime":0,"timeStamp":"2025-08-01T09:15:17.656Z","createdAt":"2025-08-01T09:15:17.663Z","updatedAt":"2025-08-01T09:15:17.663Z","__v":0},{"_id":"688c818ad97e1b93402a835a","userId":"919015190754","category":"Beauty queen ✨","resStatus":200,"resType":"Success","userAgent":"axios/1.7.7","processingTime":0,"ipAddress":"35.154.183.225","timeStamp":"2025-08-01T08:57:46.954Z","createdAt":"2025-08-01T08:57:46.956Z","updatedAt":"2025-08-01T08:57:46.956Z","__v":0},{"_id":"688c80c1d97e1b93402a8358","userId":"919015190754","category":"Changes outfit many times👗","resStatus":200,"resType":"Success","userAgent":"axios/1.7.7","processingTime":1,"ipAddress":"13.232.20.131","timeStamp":"2025-08-01T08:54:25.540Z","createdAt":"2025-08-01T08:54:25.552Z","updatedAt":"2025-08-01T08:54:25.552Z","__v":0}],"summary":{"totalRequests":5,"successCount":5,"systemErrorCount":0,"lastRequest":"2025-08-01T10:41:54.241Z","firstRequest":"2025-08-01T08:54:25.540Z","categoriesUsed":["Home decor obsessed 🪴","Changes outfit many times👗","Beauty queen ✨","Bro mujhe nahi pata 🤷‍♂️"],"avgProcessingTime":0.4,"categoryCount":4,"successRate":100,"mostUsedCategory":"Beauty queen ✨"},"pagination":{"page":1,"limit":20,"total":5,"pages":1,"hasNextPage":false,"hasPrevPage":false}},"message":"User analytics retrieved successfully","status":200}
+
+"https://mnowapi.web-dimension.com/api/v1/analytics/categories":{"success":true,"data":{"categories":[{"totalRequests":31,"successCount":31,"errorCount":0,"category":"Beauty queen ✨","avgProcessingTime":0.06,"uniqueUserCount":16,"successRate":100},{"totalRequests":23,"successCount":23,"errorCount":0,"category":"Changes outfit many times👗","avgProcessingTime":0.17,"uniqueUserCount":14,"successRate":100},{"totalRequests":22,"successCount":22,"errorCount":0,"category":"Home decor obsessed 🪴","avgProcessingTime":0.14,"uniqueUserCount":16,"successRate":100},{"totalRequests":21,"successCount":21,"errorCount":0,"category":"Miss fancy-pants 👀","avgProcessingTime":0.05,"uniqueUserCount":12,"successRate":100},{"totalRequests":18,"successCount":18,"errorCount":0,"category":"Bro mujhe nahi pata 🤷‍♂️","avgProcessingTime":0.22,"uniqueUserCount":15,"successRate":100},{"totalRequests":1,"successCount":1,"errorCount":0,"category":"analytics","avgProcessingTime":193,"uniqueUserCount":1,"successRate":100}]},"message":"Category analytics retrieved successfully","status":200}
+
+"https://s-qc.in/fetchSmartLinkByUser/676410d092064c3242909930":{"status":true,"data":[{"settings":{"trackingOptions":{"captureIP":true,"captureReferrer":true,"captureUserAgent":true,"captureGeolocation":true},"redirectType":"direct","redirectDelay":0,"passwordProtected":false,"allowedReferrers":[],"allowedCountries":[],"blockedIPs":[]},"_id":"688a2484630120ee66b2ca2a","user":"676410d092064c3242909930","name":"testing smartlink","short_id":"peBNEkeW","redirect_link":"https://www.smart-qrcodes.com","totalClicks":2186,"isActive":true,"created_by":"676410d092064c3242909930","tags":[],"metadata":{},"createdAt":"2025-07-30T13:56:20.872Z","updatedAt":"2025-07-30T14:05:13.082Z","__v":0,"lastClickedAt":"2025-07-30T14:05:13.081Z","clickRate":1093,"age":167891994,"isExpired":false,"id":"688a2484630120ee66b2ca2a"},{"settings":{"trackingOptions":{"captureIP":true,"captureReferrer":true,"captureUserAgent":true,"captureGeolocation":true},"redirectType":"direct","redirectDelay":0,"passwordProtected":false,"allowedReferrers":[],"allowedCountries":[],"blockedIPs":[]},"_id":"688a1eb76a44244fb774630b","user":"676410d092064c3242909930","name":"Kids wear","short_id":"C4EbCFMa","redirect_link":"https://www.myntra.com/kids","totalClicks":6,"isActive":true,"created_by":"676410d092064c3242909930","tags":[],"metadata":{},"createdAt":"2025-07-30T13:31:35.141Z","updatedAt":"2025-08-01T09:32:48.909Z","__v":0,"lastClickedAt":"2025-08-01T09:32:48.907Z","clickRate":3,"age":169377725,"isExpired":false,"id":"688a1eb76a44244fb774630b"}}
+
+"https://s-qc.in/fetchQrById/688b10f5fa588e8292a81ed5": "status":true,"data":{"qrData":{"settings":{"isActive":true,"allowedCountries":[],"redirectBehavior":"direct","trackReferrers":true,"storeIPAddresses":true},"batch_details":{"is_batch":false},"generation_details":{"status":"pending","generation_attempts":0},"_id":"688b10f5fa588e8292a81ed5","user_id":"676410d092064c3242909930","qr_url":"https://wa.me/message/SBRN26B4QZJSH1","qr_name":"M-NOW","qr_short_id":"aMcznnKd","qr_scan_count":5,"qr_type":"dynamic","qr_image":"","first_created":"2025-07-31T06:45:09.098Z","last_updated":"2025-08-01T12:00:10.923Z","sequence_number":1,"analytics":{"deviceBreakdown":{"mobile":4,"tablet":0,"desktop":0},"browserBreakdown":{"chrome":3,"firefox":0,"safari":0,"edge":0,"other":2},"osBreakdown":{"windows":1,"macos":0,"linux":0,"ios":3,"android":1,"other":0},"timeStats":{"hourlyScans":{"5":1,"6":1,"7":1,"8":1,"12":1},"dailyScans":{"2025-07-31":2,"2025-08-01":3},"monthlyScans":{"2025-07":2,"2025-08":3}},"peakScanDay":{},"locationBreakdown":{"Unknown":5},"averageDailyScans":0,"firstScan":"2025-07-31T06:45:31.121Z","lastScan":"2025-08-01T12:00:18.417Z"},"scanHistory":[],"createdAt":"2025-07-31T06:45:09.100Z","updatedAt":"2025-08-01T12:00:18.412Z","__v":0,"lastScannedAt":"2025-08-01T12:00:18.410Z","scanRate":2.5,"id":"688b10f5fa588e8292a81ed5"}},"msg":"Successfully Fetched QRs."}
+
+also this api  https://s-qc.in/fetchSmartLinkByUser/676410d092064c3242909930 is of Method POST and all other are of Method GET
