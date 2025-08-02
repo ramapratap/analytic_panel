@@ -63,27 +63,27 @@ const ComprehensiveAnalytics: React.FC = () => {
   ]));
 
   useEffect(() => {
-    if (!data.completeAnalytics) {
-      fetchData('https://mnowapi.web-dimension.com/api/v1/analytics', 'completeAnalytics', 'GET');
+    if (!data.categoriesAnalytics) {
+      fetchData('https://mnowapi.web-dimension.com/api/v1/analytics/categories', 'categoriesAnalytics', 'GET');
     }
-  }, [data.completeAnalytics, fetchData]);
+  }, [data.categoriesAnalytics, fetchData]);
 
   // Memoized data processing
   const processedData = useMemo((): AnalyticsData[] => {
-    if (!data.completeAnalytics) return [];
+    if (!data.categoriesAnalytics) return [];
     
-    return data.completeAnalytics.map((category: any, index: number) => ({
+    return data.categoriesAnalytics.map((category: any, index: number) => ({
       id: index + 1,
       category: category.category,
       totalRequests: category.totalRequests,
       successCount: category.successCount,
       errorCount: category.errorCount,
-      successRate: ((category.successCount / category.totalRequests) * 100).toFixed(2),
+      successRate: category.successRate?.toFixed(2) || '0',
       avgProcessingTime: category.avgProcessingTime?.toFixed(2) || '0',
       uniqueUsers: category.uniqueUserCount || 0,
-      lastActivity: new Date().toLocaleDateString(), // Mock data - replace with actual
+      lastActivity: new Date().toLocaleDateString(),
     }));
-  }, [data.completeAnalytics]);
+  }, [data.categoriesAnalytics]);
 
   // Advanced filtering logic
   const filteredData = useMemo(() => {
@@ -275,18 +275,18 @@ const ComprehensiveAnalytics: React.FC = () => {
     });
   }, []);
 
-  if (loading.completeAnalytics) {
+  if (loading.categoriesAnalytics) {
     return <LoadingSkeleton type="table" />;
   }
 
-  if (error.completeAnalytics) {
+  if (error.categoriesAnalytics) {
     return (
       <div className="text-center py-12">
         <div className="text-red-600 dark:text-red-400 mb-4">
-          Failed to load analytics data: {error.completeAnalytics}
+          Failed to load analytics data: {error.categoriesAnalytics}
         </div>
         <button
-          onClick={() => fetchData('https://mnowapi.web-dimension.com/api/v1/analytics', 'completeAnalytics', 'GET')}
+          onClick={() => fetchData('https://mnowapi.web-dimension.com/api/v1/analytics/categories', 'categoriesAnalytics', 'GET')}
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
         >
           Retry
@@ -301,7 +301,7 @@ const ComprehensiveAnalytics: React.FC = () => {
     { key: 'successCount', label: 'Success Count', sortable: true },
     { key: 'errorCount', label: 'Error Count', sortable: true },
     { key: 'successRate', label: 'Success Rate (%)', sortable: true },
-    { key: 'avgProcessingTime', label: 'Avg Time (s)', sortable: true },
+    { key: 'avgProcessingTime', label: 'Avg Time (ms)', sortable: true },
     { key: 'uniqueUsers', label: 'Unique Users', sortable: true },
     { key: 'lastActivity', label: 'Last Activity', sortable: true },
   ];
